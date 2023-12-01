@@ -71,15 +71,26 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
             for rate in rates:
                 if (usage_operation == rate['discountedOperation']):
                     #tenancy SHARED
-                    if (tenancy == 'Shared' and rate['discountedUsageType'].endswith("-BoxUsage:" + instance_type)):
+                    endsw = "-BoxUsage:"
+                    if region_code = 'us-east-1':
+                      endsw = "BoxUsage:"
+                    if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(endsw + instance_type)):
                         sp_rate = float(rate['discountedRate']['price'])
                         break
                     #tenancy DEDICATED INSTANCE
-                    elif (tenancy == 'Dedicated Instance' and rate['discountedUsageType'].endswith("-DedicatedUsage:" + instance_type)):
+                    endsw = "-DedicatedUsage:"
+                    if region_code = 'us-east-1':
+                      endsw = "DedicatedUsage:"
+                    if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(endsw + instance_type)):
+                    elif (tenancy == 'Dedicated Instance' and rate['discountedUsageType'].endswith(endsw + instance_type)):
                         sp_rate = float(rate['discountedRate']['price'])
                         break
                     #tenancy DEDICATED HOST
-                    elif (tenancy == 'Dedicated Host' and rate['discountedUsageType'].endswith("-HostUsage:" + instance_family)):
+                    endsw = "-HostUsage:"
+                    if region_code = 'us-east-1':
+                      endsw = "HostUsage:"
+                    if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(endsw + instance_type)):
+                    elif (tenancy == 'Dedicated Host' and rate['discountedUsageType'].endswith(endsw + instance_family)):
                         sp_rate = float(rate['discountedRate']['price'])
                         break
             break
