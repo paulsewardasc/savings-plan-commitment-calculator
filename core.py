@@ -68,27 +68,27 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
     for term in terms:
         if (term['sku'] == sku):
             rates = term['rates']
+            bendsw = "-BoxUsage:"
+            if region_code == 'us-east-1':
+              bendsw = "BoxUsage:"
+            dendsw = "-DedicatedUsage:"
+            if region_code == 'us-east-1':
+              dendsw = "DedicatedUsage:"
+            hendsw = "-HostUsage:"
+            if region_code == 'us-east-1':
+              hendsw = "HostUsage:"
             for rate in rates:
                 if (usage_operation == rate['discountedOperation']):
                     #tenancy SHARED
-                    endsw = "-BoxUsage:"
-                    if region_code == 'us-east-1':
-                      endsw = "BoxUsage:"
                     if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(endsw + instance_type)):
                         sp_rate = float(rate['discountedRate']['price'])
                         break
                     #tenancy DEDICATED INSTANCE
-                    endsw = "-DedicatedUsage:"
-                    if region_code == 'us-east-1':
-                      endsw = "DedicatedUsage:"
                     if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(endsw + instance_type)):
                     elif (tenancy == 'Dedicated Instance' and rate['discountedUsageType'].endswith(endsw + instance_type)):
                         sp_rate = float(rate['discountedRate']['price'])
                         break
                     #tenancy DEDICATED HOST
-                    endsw = "-HostUsage:"
-                    if region_code == 'us-east-1':
-                      endsw = "HostUsage:"
                     if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(endsw + instance_type)):
                     elif (tenancy == 'Dedicated Host' and rate['discountedUsageType'].endswith(endsw + instance_family)):
                         sp_rate = float(rate['discountedRate']['price'])
