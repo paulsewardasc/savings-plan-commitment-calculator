@@ -80,17 +80,15 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
             for rate in rates:
                 if (usage_operation == rate['discountedOperation']):
                     #tenancy SHARED
-                    if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(endsw + instance_type)):
+                    if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(bendsw + instance_type)):
                         sp_rate = float(rate['discountedRate']['price'])
                         break
                     #tenancy DEDICATED INSTANCE
-                    if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(endsw + instance_type)):
-                    elif (tenancy == 'Dedicated Instance' and rate['discountedUsageType'].endswith(endsw + instance_type)):
+                    elif (tenancy == 'Dedicated Instance' and rate['discountedUsageType'].endswith(dendsw + instance_type)):
                         sp_rate = float(rate['discountedRate']['price'])
                         break
                     #tenancy DEDICATED HOST
-                    if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(endsw + instance_type)):
-                    elif (tenancy == 'Dedicated Host' and rate['discountedUsageType'].endswith(endsw + instance_family)):
+                    elif (tenancy == 'Dedicated Host' and rate['discountedUsageType'].endswith(hendsw + instance_family)):
                         sp_rate = float(rate['discountedRate']['price'])
                         break
             break
