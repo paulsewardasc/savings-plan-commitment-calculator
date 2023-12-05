@@ -16,6 +16,10 @@ header = next(csvreader)
 writer = csv.writer(file_output)
 header.append("Savings Plan Rate ($)")
 header.append("Total Hourly Savings Plan Cost ($)")
+header.append("Total Hourly OnDemand Cost ($)")
+header.append("Monthly Savings Plan Cost ($)")
+header.append("Monthly OnDemand Cost ($)")
+
 writer.writerow(header)
 
 #summary savings plan to purchase
@@ -43,12 +47,21 @@ def elaborate_item(csv_row):
     #check parameters
     core.check_input_parameters(usage_operation, tenancy, sp_type, term, purchasing_option)
     
-    sp_rate = core.get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option)
+    rates = core.get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option)
+    sp_rate = rates[0]
+    ondemand_rate = rates[1]
+
+
     csv_row.append(sp_rate)
+    csv_row.append(ondemand_rate)
 
     total_hourly_rate = sp_rate * n_instances
+    total_hourly_rate_ondemand = ondemand_rate * n_instances
     csv_row.append(total_hourly_rate)
-    
+    csv_row.append(total_hourly_rate_ondemand)
+    csv_row.append(f'{total_hourly_rate*730:.2f}')
+    csv_row.append(f'{total_hourly_rate_ondemand*730:.2f}')
+
     writer.writerow(csv_row)
 
     # savings plan description for summary

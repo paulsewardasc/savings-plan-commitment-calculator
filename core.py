@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: MIT-0
 
 import requests
+import json
+import sys
 
 #usage operations dictionary
 #ref. mapping https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/billing-info-fields.html
@@ -34,10 +36,15 @@ tenancy_dict = {"default":"Shared",
 
 #dict to cache pricing by region
 region_price = {};
+region_price_ondemand = {};
 
 region_price_index_api_url = "https://pricing.us-east-1.amazonaws.com/savingsPlan/v1.0/aws/AWSComputeSavingsPlan/current/region_index.json"
+region_price_index_api_url_ondemand = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json"
+
 response_region_price_index = requests.get(region_price_index_api_url, timeout=5)
+response_region_price_index_ondemand = requests.get(region_price_index_api_url_ondemand, timeout=5)
 region_price_index = response_region_price_index.json()['regions']
+region_price_index_ondemand = response_region_price_index_ondemand.json()['regions']
 
 def get_pricing_by_region(region_code):
     if (region_code not in region_price): #check if region pricing is already loaded
@@ -49,6 +56,17 @@ def get_pricing_by_region(region_code):
                 region_price[region_code] = region_price_response.json()
                 break
     return region_price[region_code]
+
+def get_pricing_by_region_ondemand(region_code):
+    if (region_code not in region_price_ondemand): #check if region pricing is already loaded
+        for region, region_data in region_price_index_ondemand.items():
+            if (region_data['regionCode'] == region_code):
+                region_price_api_url = "https://pricing.us-east-1.amazonaws.com" + region_data['currentVersionUrl']
+                region_price_response_ondemand = requests.get(region_price_api_url, timeout=5)
+                #save pricing by region
+                region_price_ondemand[region_code] = region_price_response_ondemand.json()
+                break
+    return region_price_ondemand[region_code]
 
 def get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
     region_price = get_pricing_by_region(region_code)
@@ -62,6 +80,26 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
             product['productFamily'] == sp_type and
             (sp_type == "ComputeSavingsPlans" or product['attributes']['instanceType'] == instance_family)):
             sku = product['sku']
+
+    region_price_ondemand = get_pricing_by_region_ondemand(region_code)
+    products_ondemand = region_price_ondemand['products']
+    for product,product_item in products_ondemand.items():
+        if 'instanceType' in product_item['attributes']:
+          if (product_item['attributes']['instanceType'] == instance_type and
+            product_item['attributes']['tenancy'] == tenancy and
+            product_item['attributes']['operation'] == usage_operation and
+            product_item['attributes']['capacitystatus'] == 'Used'):
+            sku_ondemand = product
+
+    terms_ondemand = region_price_ondemand['terms']['OnDemand']
+    pricePerUnit_ondemand = 0
+    for term, term_item in terms_ondemand.items():
+      if term == sku_ondemand:
+        for i in term_item.keys():
+          priceDimensions = term_item[i]['priceDimensions']
+          for p in priceDimensions.keys():
+            pricePerUnit_ondemand = float(priceDimensions[p]['pricePerUnit']['USD'])
+    
 
     # find savings plan rate in the json response given the SKU
     terms = region_price['terms']['savingsPlan']
@@ -93,7 +131,7 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
                         break
             break
 
-    return sp_rate
+    return sp_rate, pricePerUnit_ondemand
 
 
 def check_input_parameters(usage_operation, tenancy, sp_type, term, purchasing_option):

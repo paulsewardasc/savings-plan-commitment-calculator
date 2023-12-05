@@ -11,13 +11,11 @@ file_output = open('output.csv', 'w', newline='')
 
 #output writer
 writer = csv.writer(file_output)
-header = ["AWS Region","Operating System","Instance Type","Tenancy","Number of Instances","Savings Plan Type","Term","Purchasing Option","Savings Plan Rate ($)","Total Hourly Savings Plan Cost ($)"]
+header = ["AWS Region","Operating System","Instance Type","Tenancy","Number of Instances","Savings Plan Type","Term","Purchasing Option","Savings Plan Rate ($)","Savings Plan Rate OnDemand ($)","Total Hourly Savings Plan Cost ($)""Total Hourly OnDemand Cost ($)","Monthly Savings Plan Cost ($)","Monthly OnDemand Cost ($)"]
 writer.writerow(header)
 
 #summary savings plan to purchase
 summary_sp = {}
-
-ec2_client = boto3.client('ec2')
 
 #input parameters
 tag_name = sys.argv[1]
@@ -25,6 +23,14 @@ tag_value = sys.argv[2]
 sp_type = sys.argv[3]
 term = sys.argv[4]
 purchasing_option = sys.argv[5]
+
+try:
+  region_code = sys.argv[6]
+  ec2_client = boto3.client('ec2', region_name=region_code)
+except:
+  ec2_client = boto3.client('ec2')
+
+
 
 def main_handler():
     response_ec2 = ec2_client.describe_instances(
@@ -66,11 +72,18 @@ def elaborate_item(instance):
     
     csv_row = [region_code, os, instance_type, tenancy, n_instances, sp_type, term, purchasing_option]
     
-    sp_rate = core.get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option)
+    rates = core.get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option)
+    sp_rate = rates[0]
+    ondemand_rate = rates[1]
     csv_row.append(sp_rate)
+    csv_row.append(ondemand_rate)
 
     total_hourly_rate = sp_rate * n_instances
+    total_hourly_rate_ondemand = ondemand_rate * n_instances
     csv_row.append(total_hourly_rate)
+    csv_row.append(total_hourly_rate_ondemand)
+    csv_row.append(f'{total_hourly_rate*730:.2f}')
+    csv_row.append(f'{total_hourly_rate_ondemand*730:.2f}')
     
     writer.writerow(csv_row)
 
