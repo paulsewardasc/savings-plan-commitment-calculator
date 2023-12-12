@@ -1,5 +1,0 @@
-﻿AWS Region,Operating System,Instance Type,Tenancy,Number of Instances,Savings Plan Type,Term,Purchasing Option
-eu-west-2,Linux/UNIX,t3a.medium,Shared,3,ComputeSavingsPlans,1yr,No Upfront
-eu-west-2,Linux/UNIX,t4g.medium,Shared,3,ComputeSavingsPlans,1yr,No Upfront
-eu-west-2,Windows,t3a.xlarge,Shared,5,EC2InstanceSavingsPlans,1yr,No Upfront
-eu-west-2,Windows,m6a.xlarge,Shared,5,EC2InstanceSavingsPlans,1yr,No Upfront
