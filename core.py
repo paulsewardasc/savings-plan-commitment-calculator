@@ -47,9 +47,11 @@ region_price_index = response_region_price_index.json()['regions']
 region_price_index_ondemand = response_region_price_index_ondemand.json()['regions']
 
 def get_pricing_by_region(region_code):
+    print('[+] Getting Costs Savings pricing')
     if (region_code not in region_price): #check if region pricing is already loaded
         for region in region_price_index:
             if (region['regionCode'] == region_code):
+                print('[*] Downloading Savings Plan pricing')
                 region_price_api_url = "https://pricing.us-east-1.amazonaws.com" + region['versionUrl']
                 region_price_response = requests.get(region_price_api_url, timeout=5)
                 #save pricing by region
@@ -58,9 +60,11 @@ def get_pricing_by_region(region_code):
     return region_price[region_code]
 
 def get_pricing_by_region_ondemand(region_code):
+    print('[+] Getting Ondemand pricing')
     if (region_code not in region_price_ondemand): #check if region pricing is already loaded
         for region, region_data in region_price_index_ondemand.items():
             if (region_data['regionCode'] == region_code):
+                print('[*] Downloading Ondemand pricing')
                 region_price_api_url = "https://pricing.us-east-1.amazonaws.com" + region_data['currentVersionUrl']
                 region_price_response_ondemand = requests.get(region_price_api_url, timeout=5)
                 #save pricing by region
@@ -68,19 +72,11 @@ def get_pricing_by_region_ondemand(region_code):
                 break
     return region_price_ondemand[region_code]
 
-def get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
+def get_ondemand_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
     region_price = get_pricing_by_region(region_code)
     sku = ''
     sp_rate = 0
     products = region_price['products']
-    # find correct SKU in the json response
-    for product in products:
-        if (product['attributes']['purchaseOption'] == purchasing_option and
-            product['attributes']['purchaseTerm'] == term and
-            product['productFamily'] == sp_type and
-            (sp_type == "ComputeSavingsPlans" or product['attributes']['instanceType'] == instance_family)):
-            sku = product['sku']
-
     region_price_ondemand = get_pricing_by_region_ondemand(region_code)
     products_ondemand = region_price_ondemand['products']
     for product,product_item in products_ondemand.items():
@@ -100,6 +96,20 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
           for p in priceDimensions.keys():
             pricePerUnit_ondemand = float(priceDimensions[p]['pricePerUnit']['USD'])
     
+    return pricePerUnit_ondemand
+
+def get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
+    region_price = get_pricing_by_region(region_code)
+    sku = ''
+    sp_rate = 0
+    products = region_price['products']
+    # find correct SKU in the json response
+    for product in products:
+        if (product['attributes']['purchaseOption'] == purchasing_option and
+            product['attributes']['purchaseTerm'] == term and
+            product['productFamily'] == sp_type and
+            (sp_type == "ComputeSavingsPlans" or product['attributes']['instanceType'] == instance_family)):
+            sku = product['sku']
 
     # find savings plan rate in the json response given the SKU
     terms = region_price['terms']['savingsPlan']
@@ -131,7 +141,7 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
                         break
             break
 
-    return sp_rate, pricePerUnit_ondemand
+    return sp_rate
 
 
 def check_input_parameters(usage_operation, tenancy, sp_type, term, purchasing_option):

@@ -1,0 +1,11 @@
+﻿AWS Region,Operating System,Instance Type,Tenancy,Number of Instances,Term,Purchasing Option,Costs Savings Plan Rate ($),EC2 Instance Savings Plan Rate ($),OnDemand Rate ($),Total Hourly Cost Savings Plan Cost ($),Total Hourly EC2 Instance Savings Plan Cost ($),Total Hourly OnDemand Cost ($),Monthly Cost Savings Plan Cost ($),Monthly EC2 Instance Savings Plan Cost ($),Monthly OnDemand Cost ($)
+eu-west-2,Linux/UNIX,t3a.medium,Shared,3,1yr,No Upfront,0.0345,0.0268,0.0425,0.10350000000000001,0.0804,0.1275,75.56,58.69,93.08
+eu-west-2,Linux/UNIX,t4g.medium,Shared,3,1yr,No Upfront,0.0306,0.0237,0.0376,0.09179999999999999,0.0711,0.11280000000000001,67.01,51.90,82.34
+eu-west-2,Windows,t3a.xlarge,Shared,5,1yr,No Upfront,0.2116,0.1806,0.2435,1.058,0.903,1.2175,772.34,659.19,888.77
+eu-west-2,Windows,m6a.xlarge,Shared,5,1yr,No Upfront,0.33572,0.31597,0.3838,1.6786,1.57985,1.9189999999999998,1225.38,1153.29,1400.87
+
+Summary Savings Plans to purchase:,Hourly Commitment ($)
+ComputeSavingsPlans (1yr - No Upfront),2.9319
+EC2InstanceSavingsPlans (1yr - No Upfront); family: t3a; region: eu-west-2,0.9834
+EC2InstanceSavingsPlans (1yr - No Upfront); family: t4g; region: eu-west-2,0.0711
+EC2InstanceSavingsPlans (1yr - No Upfront); family: m6a; region: eu-west-2,1.57985

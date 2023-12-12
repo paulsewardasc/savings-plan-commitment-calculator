@@ -11,19 +11,26 @@ file_output = open('output.csv', 'w', newline='')
 #input reader
 csvreader = csv.reader(file_input)
 header = next(csvreader)
+# Delete Type from Columns
+del header[5]
 
 #output writer
 writer = csv.writer(file_output)
-header.append("Savings Plan Rate ($)")
-header.append("Total Hourly Savings Plan Cost ($)")
+header.append("Costs Savings Plan Rate ($)")
+header.append("EC2 Instance Savings Plan Rate ($)")
+header.append("OnDemand Rate ($)")
+header.append("Total Hourly Cost Savings Plan Cost ($)")
+header.append("Total Hourly EC2 Instance Savings Plan Cost ($)")
 header.append("Total Hourly OnDemand Cost ($)")
-header.append("Monthly Savings Plan Cost ($)")
+header.append("Monthly Cost Savings Plan Cost ($)")
+header.append("Monthly EC2 Instance Savings Plan Cost ($)")
 header.append("Monthly OnDemand Cost ($)")
 
 writer.writerow(header)
 
 #summary savings plan to purchase
 summary_sp = {}
+summary_sp1 = {}
 
 def main_handler():
     #elaborate csv input rows
@@ -39,48 +46,63 @@ def elaborate_item(csv_row):
     instance_type = csv_row[2]
     tenancy = csv_row[3]
     n_instances = int(csv_row[4])
+    # Ignoring this column as we do both
     sp_type = csv_row[5]
-    term = csv_row[6]
-    purchasing_option = csv_row[7]
+    del csv_row[5]
+    term = csv_row[5]
+    purchasing_option = csv_row[6]
     instance_family = instance_type.split('.')[0]
 
     #check parameters
     core.check_input_parameters(usage_operation, tenancy, sp_type, term, purchasing_option)
     
-    rates = core.get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option)
-    sp_rate = rates[0]
-    ondemand_rate = rates[1]
+    print(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option)
+
+    # eu-west-2,Linux/UNIX,t4g.medium,Shared,1,ComputeSavingsPlans,1yr,No Upfront
+    # eu-west-2,Linux/UNIX,t4g.medium,Shared,1,EC2InstanceSavingsPlans,1yr,No Upfront
+
+    sp_rate = core.get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, 'ComputeSavingsPlans', term, purchasing_option)
+    sp_rate1 = core.get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, 'EC2InstanceSavingsPlans', term, purchasing_option)
+    ondemand_rate = core.get_ondemand_rate(region_code, usage_operation, instance_family, instance_type, tenancy, 'OnDemand', term, purchasing_option)
 
 
     csv_row.append(sp_rate)
+    csv_row.append(sp_rate1)
     csv_row.append(ondemand_rate)
 
     total_hourly_rate = sp_rate * n_instances
+    total_hourly_rate1 = sp_rate1 * n_instances
     total_hourly_rate_ondemand = ondemand_rate * n_instances
     csv_row.append(total_hourly_rate)
+    csv_row.append(total_hourly_rate1)
     csv_row.append(total_hourly_rate_ondemand)
     csv_row.append(f'{total_hourly_rate*730:.2f}')
+    csv_row.append(f'{total_hourly_rate1*730:.2f}')
     csv_row.append(f'{total_hourly_rate_ondemand*730:.2f}')
 
     writer.writerow(csv_row)
 
     # savings plan description for summary
-    if (sp_type == "ComputeSavingsPlans"):
-        sp_description = sp_type + " (" + term + " - " + purchasing_option + ")"
-    else: # EC2 Instance Savings plan case
-        sp_description = sp_type + " (" + term + " - " + purchasing_option + "); family: " + instance_family + "; region: " + region_code
+    sp_description = "ComputeSavingsPlans (" + term + " - " + purchasing_option + ")"
+    sp_description1 =  "EC2InstanceSavingsPlans (" + term + " - " + purchasing_option + "); family: " + instance_family + "; region: " + region_code
 
     # register commitment for the summary
     if (sp_description not in summary_sp):
         summary_sp[sp_description] = total_hourly_rate
     else:
         summary_sp[sp_description] += total_hourly_rate
+    if (sp_description1 not in summary_sp1):
+        summary_sp1[sp_description1] = total_hourly_rate1
+    else:
+        summary_sp1[sp_description1] += total_hourly_rate1
 
 def write_summary():
     writer.writerow([]) #empty row as separator
     writer.writerow(["Summary Savings Plans to purchase:", "Hourly Commitment ($)"])
     for sp_description in summary_sp:
         writer.writerow([sp_description, summary_sp[sp_description]])
+    for sp_description1 in summary_sp1:
+        writer.writerow([sp_description1, summary_sp1[sp_description1]])
 
 main_handler()
 
