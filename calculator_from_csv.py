@@ -16,13 +16,15 @@ del header[5]
 
 #output writer
 writer = csv.writer(file_output)
-header.append("Costs Savings Plan Rate ($)")
+header.append("Compute Savings Plan Rate ($)")
 header.append("EC2 Instance Savings Plan Rate ($)")
 header.append("OnDemand Rate ($)")
-header.append("Total Hourly Cost Savings Plan Cost ($)")
+header.append("% Saving CSP")
+header.append("% Saving EC2 ISP")
+header.append("Total Hourly Compute Savings Plan Cost ($)")
 header.append("Total Hourly EC2 Instance Savings Plan Cost ($)")
 header.append("Total Hourly OnDemand Cost ($)")
-header.append("Monthly Cost Savings Plan Cost ($)")
+header.append("Monthly Compute Savings Plan Cost ($)")
 header.append("Monthly EC2 Instance Savings Plan Cost ($)")
 header.append("Monthly OnDemand Cost ($)")
 
@@ -64,21 +66,23 @@ def elaborate_item(csv_row):
     sp_rate = core.get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, 'ComputeSavingsPlans', term, purchasing_option)
     sp_rate1 = core.get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, 'EC2InstanceSavingsPlans', term, purchasing_option)
     ondemand_rate = core.get_ondemand_rate(region_code, usage_operation, instance_family, instance_type, tenancy, 'OnDemand', term, purchasing_option)
-
-
-    csv_row.append(sp_rate)
-    csv_row.append(sp_rate1)
-    csv_row.append(ondemand_rate)
+    pcSavingCSP = 100-(sp_rate/ondemand_rate*100)
+    pcSavingEC2ISP = 100-(sp_rate1/ondemand_rate*100)
+    csv_row.append(f'{sp_rate:0.2f}')
+    csv_row.append(f'{sp_rate1:0.2f}')
+    csv_row.append(f'{ondemand_rate:0.2f}')
 
     total_hourly_rate = sp_rate * n_instances
     total_hourly_rate1 = sp_rate1 * n_instances
     total_hourly_rate_ondemand = ondemand_rate * n_instances
-    csv_row.append(total_hourly_rate)
-    csv_row.append(total_hourly_rate1)
-    csv_row.append(total_hourly_rate_ondemand)
-    csv_row.append(f'{total_hourly_rate*730:.2f}')
-    csv_row.append(f'{total_hourly_rate1*730:.2f}')
-    csv_row.append(f'{total_hourly_rate_ondemand*730:.2f}')
+    csv_row.append(f'{pcSavingCSP:0.2f}')
+    csv_row.append(f'{pcSavingEC2ISP:0.2f}')
+    csv_row.append(f'{total_hourly_rate:0.2f}')
+    csv_row.append(f'{total_hourly_rate1:0.2f}')
+    csv_row.append(f'{total_hourly_rate_ondemand:0.2f}')
+    csv_row.append(f'{total_hourly_rate*730:0.2f}')
+    csv_row.append(f'{total_hourly_rate1*730:0.2f}')
+    csv_row.append(f'{total_hourly_rate_ondemand*730:0.2f}')
 
     writer.writerow(csv_row)
 

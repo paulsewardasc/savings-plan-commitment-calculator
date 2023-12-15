@@ -4,6 +4,8 @@
 import requests
 import json
 import sys
+import os
+import time
 
 #usage operations dictionary
 #ref. mapping https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/billing-info-fields.html
@@ -38,24 +40,57 @@ tenancy_dict = {"default":"Shared",
 region_price = {};
 region_price_ondemand = {};
 
-region_price_index_api_url = "https://pricing.us-east-1.amazonaws.com/savingsPlan/v1.0/aws/AWSComputeSavingsPlan/current/region_index.json"
-region_price_index_api_url_ondemand = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json"
 
-response_region_price_index = requests.get(region_price_index_api_url, timeout=5)
-response_region_price_index_ondemand = requests.get(region_price_index_api_url_ondemand, timeout=5)
-region_price_index = response_region_price_index.json()['regions']
-region_price_index_ondemand = response_region_price_index_ondemand.json()['regions']
+def get_if_old(fname,url,region):
+  try:
+    secs = time.time()-os.stat(fname).st_mtime
+  except:
+    secs = 99999
+  if secs > 86400:
+    print(f'[*] Downloading {fname}')
+    resp = requests.get(url, timeout=5)
+    f = open(fname,'w')
+    f.write(json.dumps(resp.json(),indent=2))
+    f.close
+    if region == 'yes':
+      resp_json = resp.json()['regions']
+    else:
+      resp_json = resp.json()
+  else:
+    print(f'[+] Using cached data from {fname}')
+    f = open(fname,'r')
+    resp = json.load(f)
+    f.close
+    if region == 'yes':
+      resp_json = resp['regions']
+    else:
+      resp_json = resp
+  return resp_json 
+  
+region_price_index_api_url = "https://pricing.us-east-1.amazonaws.com/savingsPlan/v1.0/aws/AWSComputeSavingsPlan/current/region_index.json"
+fname = 'region_price_index.json'
+region_price_index = get_if_old(fname,region_price_index_api_url,'yes')
+
+region_price_index_api_url_ondemand = "https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json"
+fname = 'region_price_index_ondemand.json'
+region_price_index_ondemand = get_if_old(fname,region_price_index_api_url_ondemand,'yes')
+
+#response_region_price_index_ondemand = requests.get(region_price_index_api_url_ondemand, timeout=5)
+#f = open('region_price_index_ondemand.json','w')
+#f.write(json.dumps(response_region_price_index_ondemand.json(), indent=2))
+#f.close
+#region_price_index_ondemand = response_region_price_index_ondemand.json()['regions']
 
 def get_pricing_by_region(region_code):
     print('[+] Getting Costs Savings pricing')
     if (region_code not in region_price): #check if region pricing is already loaded
         for region in region_price_index:
             if (region['regionCode'] == region_code):
-                print('[*] Downloading Savings Plan pricing')
                 region_price_api_url = "https://pricing.us-east-1.amazonaws.com" + region['versionUrl']
-                region_price_response = requests.get(region_price_api_url, timeout=5)
+                fname = 'region_price.json'
+                region_price_response = get_if_old(fname,region_price_api_url,'no')
                 #save pricing by region
-                region_price[region_code] = region_price_response.json()
+                region_price[region_code] = region_price_response
                 break
     return region_price[region_code]
 
@@ -64,29 +99,28 @@ def get_pricing_by_region_ondemand(region_code):
     if (region_code not in region_price_ondemand): #check if region pricing is already loaded
         for region, region_data in region_price_index_ondemand.items():
             if (region_data['regionCode'] == region_code):
-                print('[*] Downloading Ondemand pricing')
                 region_price_api_url = "https://pricing.us-east-1.amazonaws.com" + region_data['currentVersionUrl']
-                region_price_response_ondemand = requests.get(region_price_api_url, timeout=5)
+                fname = 'region_price_ondemand.json'
+                region_price_response_ondemand = get_if_old(fname,region_price_api_url,'no')
                 #save pricing by region
-                region_price_ondemand[region_code] = region_price_response_ondemand.json()
+                region_price_ondemand[region_code] = region_price_response_ondemand
                 break
     return region_price_ondemand[region_code]
 
 def get_ondemand_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
-    region_price = get_pricing_by_region(region_code)
+    region_price_ondemand = get_pricing_by_region_ondemand(region_code)
     sku = ''
     sp_rate = 0
-    products = region_price['products']
-    region_price_ondemand = get_pricing_by_region_ondemand(region_code)
     products_ondemand = region_price_ondemand['products']
-    for product,product_item in products_ondemand.items():
+    for product, product_item in products_ondemand.items():
         if 'instanceType' in product_item['attributes']:
           if (product_item['attributes']['instanceType'] == instance_type and
             product_item['attributes']['tenancy'] == tenancy and
             product_item['attributes']['operation'] == usage_operation and
             product_item['attributes']['capacitystatus'] == 'Used'):
-            sku_ondemand = product
+            sku_ondemand = product_item['sku']
 
+    #print(json.dumps(region_price_ondemand['terms'],indent=2))
     terms_ondemand = region_price_ondemand['terms']['OnDemand']
     pricePerUnit_ondemand = 0
     for term, term_item in terms_ondemand.items():
@@ -103,7 +137,6 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
     sku = ''
     sp_rate = 0
     products = region_price['products']
-    # find correct SKU in the json response
     for product in products:
         if (product['attributes']['purchaseOption'] == purchasing_option and
             product['attributes']['purchaseTerm'] == term and
