@@ -3,6 +3,7 @@
 
 import csv
 import core
+import datetime
 
 # csv input and output files
 file_input = open('input.csv')
@@ -21,6 +22,8 @@ header.append("EC2 Instance Savings Plan Rate ($)")
 header.append("OnDemand Rate ($)")
 header.append("% Saving CSP")
 header.append("% Saving EC2 ISP")
+header.append("CSP Break Even Date")
+header.append("EC2ISP Break Even Date")
 header.append("Total Hourly Compute Savings Plan Cost ($)")
 header.append("Total Hourly EC2 Instance Savings Plan Cost ($)")
 header.append("Total Hourly OnDemand Cost ($)")
@@ -53,12 +56,16 @@ def elaborate_item(csv_row):
     del csv_row[5]
     term = csv_row[5]
     purchasing_option = csv_row[6]
+    try:
+      start_date = csv_row[7]
+    except:
+      start_date = datetime.date.today().strftime('%d/%m/%Y')
     instance_family = instance_type.split('.')[0]
 
     #check parameters
     core.check_input_parameters(usage_operation, tenancy, sp_type, term, purchasing_option)
     
-    print(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option)
+    print(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option, start_date)
 
     # eu-west-2,Linux/UNIX,t4g.medium,Shared,1,ComputeSavingsPlans,1yr,No Upfront
     # eu-west-2,Linux/UNIX,t4g.medium,Shared,1,EC2InstanceSavingsPlans,1yr,No Upfront
@@ -68,21 +75,35 @@ def elaborate_item(csv_row):
     ondemand_rate = core.get_ondemand_rate(region_code, usage_operation, instance_family, instance_type, tenancy, 'OnDemand', term, purchasing_option)
     pcSavingCSP = 100-(sp_rate/ondemand_rate*100)
     pcSavingEC2ISP = 100-(sp_rate1/ondemand_rate*100)
-    csv_row.append(f'{sp_rate:0.2f}')
-    csv_row.append(f'{sp_rate1:0.2f}')
-    csv_row.append(f'{ondemand_rate:0.2f}')
+    csv_row.append(f'{sp_rate}')
+    csv_row.append(f'{sp_rate1}')
+    csv_row.append(f'{ondemand_rate}')
 
     total_hourly_rate = sp_rate * n_instances
     total_hourly_rate1 = sp_rate1 * n_instances
     total_hourly_rate_ondemand = ondemand_rate * n_instances
+    breakeven_csp = (100-pcSavingCSP)
+    breakeven_csp = breakeven_csp*730/100*12/24
+    date_1 = datetime.datetime.strptime(start_date, "%d/%m/%Y")
+    end_date = date_1 + datetime.timedelta(days=breakeven_csp)
+    end_date_csp = end_date.strftime('%d/%m/%Y')
+    breakeven_ec2isp = (100-pcSavingEC2ISP)
+    breakeven_ec2isp = breakeven_ec2isp*730/100*12/24
+    date_1 = datetime.datetime.strptime(start_date, "%d/%m/%Y")
+    end_date = date_1 + datetime.timedelta(days=breakeven_ec2isp)
+    end_date_ec2isp = end_date.strftime('%d/%m/%Y')
+
     csv_row.append(f'{pcSavingCSP:0.2f}')
     csv_row.append(f'{pcSavingEC2ISP:0.2f}')
+    csv_row.append(f'{end_date_csp}')
+    csv_row.append(f'{end_date_ec2isp}')
     csv_row.append(f'{total_hourly_rate:0.2f}')
     csv_row.append(f'{total_hourly_rate1:0.2f}')
     csv_row.append(f'{total_hourly_rate_ondemand:0.2f}')
     csv_row.append(f'{total_hourly_rate*730:0.2f}')
     csv_row.append(f'{total_hourly_rate1*730:0.2f}')
     csv_row.append(f'{total_hourly_rate_ondemand*730:0.2f}')
+    csv_row.append(f'{end_date}')
 
     writer.writerow(csv_row)
 
