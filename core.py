@@ -47,7 +47,6 @@ def get_if_old(fname,url,region):
   except:
     secs = 99999
   if secs > 86400:
-    print(f'[*] Downloading {fname}')
     resp = requests.get(url, timeout=5)
     f = open(fname,'w')
     f.write(json.dumps(resp.json(),indent=2))
@@ -57,7 +56,7 @@ def get_if_old(fname,url,region):
     else:
       resp_json = resp.json()
   else:
-    print(f'[+] Using cached data from {fname}')
+    #print(f'[+] Using cached data from {fname}')
     f = open(fname,'r')
     resp = json.load(f)
     f.close
@@ -106,7 +105,7 @@ def get_pricing_by_region_ondemand(region_code):
     return region_price_ondemand[region_code]
 
 def get_ondemand_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
-    print(f'[+] Getting Ondemand pricing')
+    #print(f'[+] Getting Ondemand pricing')
     region_price_ondemand = get_pricing_by_region_ondemand(region_code)
     sku = ''
     sp_rate = 0
@@ -173,7 +172,7 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
                         break
             break
 
-    print(f'[+] Getting Costs Savings pricing - {sp_rate}, {sp_type}, {purchasing_option}')
+    #print(f'[+] Getting Costs Savings pricing - {sp_rate}, {sp_type}, {purchasing_option}')
     return sp_rate
 
 
