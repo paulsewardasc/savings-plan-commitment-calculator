@@ -94,7 +94,9 @@ def elaborate_item(csv_row):
 
     #check parameters
     core.check_input_parameters(usage_operation, tenancy, sp_type, term, purchasing_option)
-    
+   
+    print('') 
+    print('[INFO] ------------------------------------------------------------------------------------------')
     print('[INFO]',region_code, usage_operation, instance_family, instance_type, tenancy, term, start_date)
 
     # eu-west-2,Linux/UNIX,t4g.medium,Shared,1,ComputeSavingsPlans,1yr,No Upfront
