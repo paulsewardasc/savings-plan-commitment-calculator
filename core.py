@@ -42,6 +42,11 @@ region_price_ondemand = {};
 
 
 def get_if_old(fname,url,region):
+  if region == 'no':
+    regionname = url.split("/")[8]
+    fname_temp = fname.split(".")
+    fname = f'{fname_temp[0]}-{regionname}.{fname_temp[1]}'
+
   try:
     secs = time.time()-os.stat(fname).st_mtime
   except:
@@ -130,6 +135,44 @@ def get_ondemand_rate(region_code, usage_operation, instance_family, instance_ty
     
     return pricePerUnit_ondemand
 
+def get_reserved_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
+    #print(f'[+] Getting Reserved pricing')
+    upfront_fee = 0
+    #print(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option)
+    term_type = term
+    region_price_reserved = get_pricing_by_region_ondemand(region_code)
+    sku = ''
+    sp_rate = 0
+    products_reserved = region_price_reserved['products']
+    for product, product_item in products_reserved.items():
+        if 'instanceType' in product_item['attributes']:
+          if (product_item['attributes']['instanceType'] == instance_type and
+            product_item['attributes']['tenancy'] == tenancy and
+            product_item['attributes']['operation'] == usage_operation and
+            product_item['attributes']['capacitystatus'] == 'Used'):
+            sku_reserved = product_item['sku']
+
+    #print(json.dumps(region_price_reserved['terms'],indent=2))
+    terms_reserved = region_price_reserved['terms']['Reserved']
+    pricePerUnit_reserved = 0
+    for term, term_item in terms_reserved.items():
+      if term == sku_reserved:
+        #print(f'[2] {term},{json.dumps(term_item,indent=2)}')
+        for i in term_item.keys():
+          priceDimensions = term_item[i]['priceDimensions']
+          termAttributes = term_item[i]['termAttributes']
+          #print(purchasing_option,termAttributes)
+          if purchasing_option in termAttributes['PurchaseOption'] and term_type in termAttributes['LeaseContractLength'] and termAttributes['OfferingClass'] == 'standard':
+            #print(f'[3] {json.dumps(priceDimensions,indent=2)}')
+            for p in priceDimensions.keys():
+              #print(f'[4] Description: {priceDimensions[p]["description"]}')
+              if priceDimensions[p]["description"] == 'Upfront Fee':
+                upfront_fee = float(priceDimensions[p]['pricePerUnit']['USD'])
+              else:
+                pricePerUnit_reserved = float(priceDimensions[p]['pricePerUnit']['USD'])
+    #print(f'[+] Reserved: {pricePerUnit_reserved}, {upfront_fee}')
+    return pricePerUnit_reserved, upfront_fee
+
 def get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
     region_price = get_pricing_by_region(region_code)
     sku = ''
@@ -144,6 +187,7 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
 
     # find savings plan rate in the json response given the SKU
     terms = region_price['terms']['savingsPlan']
+    discounted_sku = '' 
     for term in terms:
         if (term['sku'] == sku):
             rates = term['rates']
@@ -161,6 +205,7 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
                     #tenancy SHARED
                     if (tenancy == 'Shared' and rate['discountedUsageType'].endswith(bendsw + instance_type)):
                         sp_rate = float(rate['discountedRate']['price'])
+                        discounted_sku = rate['discountedSku']
                         break
                     #tenancy DEDICATED INSTANCE
                     elif (tenancy == 'Dedicated Instance' and rate['discountedUsageType'].endswith(dendsw + instance_type)):
@@ -172,7 +217,7 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
                         break
             break
 
-    #print(f'[+] Getting Costs Savings pricing - {sp_rate}, {sp_type}, {purchasing_option}')
+    #print(f'[+] Getting Costs Savings pricing - {sku}, {discounted_sku}, {sp_rate}, {sp_type}, {purchasing_option}')
     return sp_rate
 
 
