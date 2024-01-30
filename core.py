@@ -176,6 +176,7 @@ def get_reserved_rate(region_code, usage_operation, instance_family, instance_ty
 def get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
     region_price = get_pricing_by_region(region_code)
     sku = ''
+    termtime = term
     sp_rate = 0
     products = region_price['products']
     for product in products:
@@ -217,7 +218,7 @@ def get_savings_plan_rate(region_code, usage_operation, instance_family, instanc
                         break
             break
 
-    #print(f'[+] Getting Costs Savings pricing - {sku}, {discounted_sku}, {sp_rate}, {sp_type}, {purchasing_option}')
+    #print(f'[+] Getting Costs Savings pricing - {sku}, {termtime}, {discounted_sku}, {sp_rate}, {sp_type}, {purchasing_option}')
     return sp_rate
 
 
