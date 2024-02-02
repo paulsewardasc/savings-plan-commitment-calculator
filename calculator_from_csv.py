@@ -6,6 +6,35 @@ import core
 import datetime
 import sys
 
+def get_costs(a,b,c,d,e,f,g):
+  print(f'[+] {a},{b},{c},{d},{e},{f},{g}')
+  row = []
+  row.extend(a)
+  row.append(g)
+  t1 = row[4]
+  t2 = row[3]
+  row[3] = t1
+  row[4] = t2
+  colf = b
+  colg = colf * c
+  colh = d * 730
+  coli = colh * 12
+  colj = (b / e) + (d * 730 * 12)
+  colk = d * 730 * c
+  coll = ((colf / e) + (colh * 12)) * c
+  colm = coll * e
+  coln = f
+  row.append(f'{colf:0.3f}')
+  row.append(f'{colg:0.3f}')
+  row.append(f'{colh:0.3f}')
+  row.append(f'{coli:0.3f}')
+  row.append(f'{colj:0.3f}')
+  row.append(f'{colk:0.3f}')
+  row.append(f'{coll:0.3f}')
+  row.append(f'{colm:0.3f}')
+  row.append(coln)
+  return row
+
 # csv input and output files
 file_input = open('input.csv')
 file_output = open('output.csv', 'w', newline='')
@@ -32,7 +61,6 @@ header = next(csvreader)
 del header[5]
 # Change the order of the header
 newheader = header.copy()
-print(f'[+] header: {header}')
 newheader[0] = header[2]
 newheader[1] = header[1]
 newheader[2] = header[0]
@@ -43,7 +71,6 @@ newheader[5] = "fred"
 del newheader[7]
 del newheader[6]
 del newheader[5]
-print(f'[+] newheader: {newheader}')
 header = newheader
 
 csv_row1 = []
@@ -69,6 +96,7 @@ header.append("Yearly / Instance")
 header.append("Yearly / Instance + Upfront")
 header.append("Monthly Total (All Instances)")
 header.append("Yearly Total (All Instances + Upfront)")
+header.append("Total")
 header.append("Term")
 
 writer.writerow(header)
@@ -89,6 +117,7 @@ def main_handler():
     csv_total_6_u = 0
     csv_total_7_u = 0
     csv_total_8_u = 0
+    csv_total_9_u = 0
     for i,j in csv_1.items():
       csv = ",".join(j)
       print(f'{csv}')
@@ -101,7 +130,8 @@ def main_handler():
       csv_total_6_u += float(j[9])
       csv_total_7_u += float(j[10])
       csv_total_8_u += float(j[11])
-    row=f'Total,,,,{csv_total_1_u},{csv_total_2_u},{csv_total_3_u},{csv_total_4_u},{csv_total_5_u},{csv_total_6_u},{csv_total_7_u},{csv_total_8_u}'
+      csv_total_9_u += float(j[12])
+    row=f'Total,,,,{csv_total_1_u},{csv_total_2_u},{csv_total_3_u},{csv_total_4_u},{csv_total_5_u},{csv_total_6_u},{csv_total_7_u},{csv_total_8_u},{csv_total_9_u}'
     print(row)
     writer.writerow(row.split(","))
     
@@ -114,6 +144,7 @@ def main_handler():
     csv_total_6 = 0
     csv_total_7 = 0
     csv_total_8 = 0
+    csv_total_9 = 0
     for i,j in csv_2.items():
       csv = ",".join(j)
       print(f'{csv}')
@@ -126,13 +157,13 @@ def main_handler():
       csv_total_6 += float(j[9])
       csv_total_7 += float(j[10])
       csv_total_8 += float(j[11])
-    row=f'Total,,,,{csv_total_1},{csv_total_2},{csv_total_3},{csv_total_4},{csv_total_5},{csv_total_6},{csv_total_7},{csv_total_8}'
+      csv_total_9 += float(j[12])
+    row=f'Total,,,,{csv_total_1},{csv_total_2},{csv_total_3},{csv_total_4},{csv_total_5},{csv_total_6},{csv_total_7},{csv_total_8},{csv_total_9}'
     print(row)
     writer.writerow(row.split(","))
-    row=f',,,Total vs On Demand,,,,{csv_total_4_u-csv_total_4:0.2f},{csv_total_5_u-csv_total_5:0.2f},{csv_total_6_u-csv_total_6:0.2f},{csv_total_7_u-csv_total_7:0.2f},{csv_total_8_u-csv_total_8:0.2f}'
+    row=f',,,Total vs On Demand,,,,{csv_total_4_u-csv_total_4:0.2f},{csv_total_5_u-csv_total_5:0.2f},{csv_total_6_u-csv_total_6:0.2f},{csv_total_7_u-csv_total_7:0.2f},{csv_total_8_u-csv_total_8:0.2f},{csv_total_9_u-csv_total_9:0.2f}'
     print(row)
     writer.writerow(row.split(","))
-
 
     csv_total_1 = 0
     csv_total_2 = 0
@@ -142,6 +173,7 @@ def main_handler():
     csv_total_6 = 0
     csv_total_7 = 0
     csv_total_8 = 0
+    csv_total_9 = 0
     for i,j in csv_3.items():
       csv = ",".join(j)
       print(f'{csv}')
@@ -154,10 +186,11 @@ def main_handler():
       csv_total_6 += float(j[9])
       csv_total_7 += float(j[10])
       csv_total_8 += float(j[11])
-    row=f'Total,,,,{csv_total_1},{csv_total_2},{csv_total_3},{csv_total_4},{csv_total_5},{csv_total_6},{csv_total_7},{csv_total_8}'
+      csv_total_9 += float(j[12])
+    row=f'Total,,,,{csv_total_1},{csv_total_2},{csv_total_3},{csv_total_4},{csv_total_5},{csv_total_6},{csv_total_7},{csv_total_8},{csv_total_9}'
     print(row)
     writer.writerow(row.split(","))
-    row=f',,,Total vs On Demand,,,,{csv_total_4_u-csv_total_4:0.2f},{csv_total_5_u-csv_total_5:0.2f},{csv_total_6_u-csv_total_6:0.2f},{csv_total_7_u-csv_total_7:0.2f},{csv_total_8_u-csv_total_8:0.2f}'
+    row=f',,,Total vs On Demand,,,,{csv_total_4_u-csv_total_4:0.2f},{csv_total_5_u-csv_total_5:0.2f},{csv_total_6_u-csv_total_6:0.2f},{csv_total_7_u-csv_total_7:0.2f},{csv_total_8_u-csv_total_8:0.2f},{csv_total_9_u-csv_total_9:0.2f}'
     print(row)
     writer.writerow(row.split(","))
 
@@ -169,6 +202,7 @@ def main_handler():
     csv_total_6 = 0
     csv_total_7 = 0
     csv_total_8 = 0
+    csv_total_9 = 0
     for i,j in csv_4.items():
       csv = ",".join(j)
       print(f'{csv}')
@@ -181,10 +215,11 @@ def main_handler():
       csv_total_6 += float(j[9])
       csv_total_7 += float(j[10])
       csv_total_8 += float(j[11])
-    row=f'Total,,,,{csv_total_1},{csv_total_2},{csv_total_3},{csv_total_4},{csv_total_5},{csv_total_6},{csv_total_7},{csv_total_8}'
+      csv_total_9 += float(j[12])
+    row=f'Total,,,,{csv_total_1},{csv_total_2},{csv_total_3},{csv_total_4},{csv_total_5},{csv_total_6},{csv_total_7},{csv_total_8},{csv_total_9}'
     print(row)
     writer.writerow(row.split(","))
-    row=f',,,Total vs On Demand,,,,{csv_total_4_u-csv_total_4:0.2f},{csv_total_5_u-csv_total_5:0.2f},{csv_total_6_u-csv_total_6:0.2f},{csv_total_7_u-csv_total_7:0.2f},{csv_total_8_u-csv_total_8:0.2f}'
+    row=f',,,Total vs On Demand,,,,{csv_total_4_u-csv_total_4:0.2f},{csv_total_5_u-csv_total_5:0.2f},{csv_total_6_u-csv_total_6:0.2f},{csv_total_7_u-csv_total_7:0.2f},{csv_total_8_u-csv_total_8:0.2f},{csv_total_9_u-csv_total_9:0.2f}'
     print(row)
     writer.writerow(row.split(","))
 
@@ -321,244 +356,55 @@ def elaborate_item(csv_row):
     # Reserved Instance
     if savingsPlanType == 1:
       # On Demand
-      csv_row1 = []
-      csv_row1.extend(csv_row)
-      csv_row1.append('On Demand')
-      t1 = csv_row1[4]
-      t2 = csv_row1[3]
-      csv_row1[3] = t1
-      csv_row1[4] = t2
-      # Upfront / instance
-      csv_row1.append(f'0.00')
-      # Total Upfront
-      csv_row1.append(f'0.00')
-      # Monthly / Instance
-      csv_row1.append(f'{norm_ondemand_rate:0.2f}')
-      # Yearly / Instance
-      csv_row1.append(f'{norm_ondemand_rate*12:0.2f}')
-      # Yearly / Instance + Upfront
-      csv_row1.append(f'{norm_ondemand_rate*12:0.2f}')
-      # Monthly Total (All Insatnces)
-      csv_row1.append(f'{norm_ondemand_rate*n_instances:0.2f}')
-      # Yearly Total (All Instances + Upfront)
-      csv_row1.append(f'{norm_ondemand_rate*n_instances*12:0.2f}')
-      csv_row1.append('')
+      csv_row1 = get_costs(csv_row, 0, n_instances, ondemand_rate, termno, termtime,'On Demand')
       csv_1[row_count] = csv_row1
       
       # No Upfront
-      csv_row2 = []
-      csv_row2.extend(csv_row)
-      csv_row2.append('No Upfront')
-      t1 = csv_row2[4]
-      t2 = csv_row2[3]
-      csv_row2[3] = t1
-      csv_row2[4] = t2
-      csv_row2.append(f'{reserved_upfront_nu:0.2f}')
-      csv_row2.append(f'{reserved_upfront_nu*n_instances:0.2f}')
-      csv_row2.append(f'{reserved_rate_nu*730:0.2f}')
-      csv_row2.append(f'{reserved_rate_nu*730*12:0.2f}')
-      csv_row2.append(f'{(reserved_upfront_nu)+(reserved_rate_nu*730*12):0.2f}')
-      csv_row2.append(f'{reserved_rate_nu*730*n_instances:0.2f}')
-      csv_row2.append(f'{(reserved_upfront_nu*n_instances)+(reserved_rate_nu*730*n_instances*12):0.2f}')
-      csv_row2.append(termtime)
+      csv_row2 = get_costs(csv_row, reserved_upfront_nu, n_instances, reserved_rate_nu,termno, termtime,'No Upfront')
       csv_2[row_count] = csv_row2
   
       # Partial Upfront
-      csv_row3 = []
-      csv_row3.extend(csv_row)
-      csv_row3.append('Partial Upfront')
-      t1 = csv_row3[4]
-      t2 = csv_row3[3]
-      csv_row3[3] = t1
-      csv_row3[4] = t2
-      csv_row3.append(f'{reserved_upfront_pu:0.2f}')
-      csv_row3.append(f'{reserved_upfront_pu*n_instances:0.2f}')
-      csv_row3.append(f'{reserved_rate_pu*730:0.2f}')
-      csv_row3.append(f'{reserved_rate_pu*730*12:0.2f}')
-      csv_row3.append(f'{(reserved_upfront_pu)+(reserved_rate_pu*730*12):0.2f}')
-      csv_row3.append(f'{reserved_rate_pu*730*n_instances:0.2f}')
-      csv_row3.append(f'{(reserved_upfront_pu*n_instances)+(reserved_rate_pu*730*n_instances*12):0.2f}')
-      csv_row3.append(termtime)
+      csv_row3 = get_costs(csv_row, reserved_upfront_pu, n_instances, reserved_rate_pu, termno, termtime,'Partial Upfront')
       csv_3[row_count] = csv_row3
   
       # All Upfront
-      csv_row4 = []
-      csv_row4.extend(csv_row)
-      csv_row4.append('All Upfront')
-      t1 = csv_row4[4]
-      t2 = csv_row4[3]
-      csv_row4[3] = t1
-      csv_row4[4] = t2
-      csv_row4.append(f'{reserved_upfront_au:0.2f}')
-      csv_row4.append(f'{reserved_upfront_au*n_instances:0.2f}')
-      csv_row4.append(f'{reserved_rate_au*730:0.2f}')
-      csv_row4.append(f'{reserved_rate_au*730*12:0.2f}')
-      csv_row4.append(f'{(reserved_upfront_au)+(reserved_rate_au*termno*730*12):0.2f}')
-      csv_row4.append(f'{reserved_rate_au*730*n_instances:0.2f}')
-      csv_row4.append(f'{(reserved_upfront_au*n_instances)+(reserved_rate_au*730*n_instances*12):0.2f}')
-      csv_row4.append(termtime)
+      csv_row4 = get_costs(csv_row, reserved_upfront_au, n_instances, reserved_rate_au, termno, termtime,'All Upfront')
       csv_4[row_count] = csv_row4
       row_count += 1
 
     if savingsPlanType == 2:
       # On Demand
-      csv_row1 = []
-      csv_row1.extend(csv_row)
-      csv_row1.append('On Demand')
-      t1 = csv_row1[4]
-      t2 = csv_row1[3]
-      csv_row1[3] = t1
-      csv_row1[4] = t2
-      # Upfront / instance
-      csv_row1.append(f'0.00')
-      # Total Upfront
-      csv_row1.append(f'0.00')
-      # Monthly / Instance
-      csv_row1.append(f'{norm_ondemand_rate:0.2f}')
-      # Yearly / Instance
-      csv_row1.append(f'{norm_ondemand_rate*12:0.2f}')
-      # Yearly / Instance + Upfront
-      csv_row1.append(f'{norm_ondemand_rate*12:0.2f}')
-      # Monthly Total (All Insatnces)
-      csv_row1.append(f'{norm_ondemand_rate*n_instances:0.2f}')
-      # Yearly Total (All Instances + Upfront)
-      csv_row1.append(f'{norm_ondemand_rate*n_instances*12:0.2f}')
-      csv_row1.append('')
+      csv_row1 = get_costs(csv_row, 0, n_instances, ondemand_rate, termno, termtime,'On Demand')
       csv_1[row_count] = csv_row1
       
       # No Upfront
-      csv_row2 = []
-      csv_row2.extend(csv_row)
-      csv_row2.append('No Upfront')
-      t1 = csv_row2[4]
-      t2 = csv_row2[3]
-      csv_row2[3] = t1
-      csv_row2[4] = t2
-      csv_row2.append(f'{upfront_nu:0.2f}')
-      csv_row2.append(f'{upfront_nu*n_instances:0.2f}')
-      csv_row2.append(f'{hourly_cost_nu*730:0.2f}')
-      csv_row2.append(f'{hourly_cost_nu*730*12:0.2f}')
-      csv_row2.append(f'{(upfront_nu)+(hourly_cost_nu*730*12):0.2f}')
-      csv_row2.append(f'{hourly_cost_nu*730*n_instances:0.2f}')
-      csv_row2.append(f'{(upfront_nu*n_instances)+(hourly_cost_nu*730*n_instances*12):0.2f}')
-      csv_row2.append(termtime)
+      csv_row2 = get_costs(csv_row, upfront_nu, n_instances, hourly_cost_nu,termno, termtime,'No Upfront')
       csv_2[row_count] = csv_row2
   
       # Partial Upfront
-      csv_row3 = []
-      csv_row3.extend(csv_row)
-      csv_row3.append('Partial Upfront')
-      t1 = csv_row3[4]
-      t2 = csv_row3[3]
-      csv_row3[3] = t1
-      csv_row3[4] = t2
-      csv_row3.append(f'{upfront_pu:0.2f}')
-      csv_row3.append(f'{upfront_pu*n_instances:0.2f}')
-      csv_row3.append(f'{hourly_cost_pu*730:0.2f}')
-      csv_row3.append(f'{hourly_cost_pu*730*12:0.2f}')
-      csv_row3.append(f'{(upfront_pu)+(hourly_cost_pu*730*12):0.2f}')
-      csv_row3.append(f'{hourly_cost_pu*730*n_instances:0.2f}')
-      csv_row3.append(f'{(upfront_pu*n_instances)+(hourly_cost_pu*730*n_instances*12):0.2f}')
-      csv_row3.append(termtime)
+      csv_row3 = get_costs(csv_row, upfront_pu, n_instances, hourly_cost_pu, termno, termtime,'Partial Upfront')
       csv_3[row_count] = csv_row3
   
       # All Upfront
-      csv_row4 = []
-      csv_row4.extend(csv_row)
-      csv_row4.append('All Upfront')
-      t1 = csv_row4[4]
-      t2 = csv_row4[3]
-      csv_row4[3] = t1
-      csv_row4[4] = t2
-      csv_row4.append(f'{upfront_au:0.2f}')
-      csv_row4.append(f'{upfront_au*n_instances:0.2f}')
-      csv_row4.append(f'{hourly_cost_au*730:0.2f}')
-      csv_row4.append(f'{hourly_cost_au*730*12:0.2f}')
-      csv_row4.append(f'{(upfront_au)+(hourly_cost_au*730*12):0.2f}')
-      csv_row4.append(f'{hourly_cost_au*730*n_instances:0.2f}')
-      csv_row4.append(f'{(upfront_au*n_instances)+(hourly_cost_au*730*n_instances*12):0.2f}')
-      csv_row4.append(termtime)
+      csv_row4 = get_costs(csv_row, upfront_au, n_instances, hourly_cost_au, termno, termtime,'All Upfront')
       csv_4[row_count] = csv_row4
       row_count += 1
  
     if savingsPlanType == 3:
       # On Demand
-      csv_row1 = []
-      csv_row1.extend(csv_row)
-      csv_row1.append('On Demand')
-      t1 = csv_row1[4]
-      t2 = csv_row1[3]
-      csv_row1[3] = t1
-      csv_row1[4] = t2
-      # Upfront / instance
-      csv_row1.append(f'0.00')
-      # Total Upfront
-      csv_row1.append(f'0.00')
-      # Monthly / Instance
-      csv_row1.append(f'{norm_ondemand_rate:0.2f}')
-      # Yearly / Instance
-      csv_row1.append(f'{norm_ondemand_rate*12:0.2f}')
-      # Yearly / Instance + Upfront
-      csv_row1.append(f'{norm_ondemand_rate*12:0.2f}')
-      # Monthly Total (All Insatnces)
-      csv_row1.append(f'{norm_ondemand_rate*n_instances:0.2f}')
-      # Yearly Total (All Instances + Upfront)
-      csv_row1.append(f'{norm_ondemand_rate*n_instances*12:0.2f}')
-      csv_row1.append('')
+      csv_row1 = get_costs(csv_row, 0, n_instances, ondemand_rate, termno, termtime,'On Demand')
       csv_1[row_count] = csv_row1
       
       # No Upfront
-      csv_row2 = []
-      csv_row2.extend(csv_row)
-      csv_row2.append('No Upfront')
-      t1 = csv_row2[4]
-      t2 = csv_row2[3]
-      csv_row2[3] = t1
-      csv_row2[4] = t2
-      csv_row2.append(f'{upfront1_nu:0.2f}')
-      csv_row2.append(f'{upfront1_nu*n_instances:0.2f}')
-      csv_row2.append(f'{hourly_cost1_nu*730:0.2f}')
-      csv_row2.append(f'{hourly_cost1_nu*730*12:0.2f}')
-      csv_row2.append(f'{(upfront1_nu)+(hourly_cost1_nu*730*12):0.2f}')
-      csv_row2.append(f'{hourly_cost1_nu*730*n_instances:0.2f}')
-      csv_row2.append(f'{(upfront1_nu*n_instances)+(hourly_cost1_nu*730*n_instances*12):0.2f}')
-      csv_row2.append(termtime)
+      csv_row2 = get_costs(csv_row, upfront1_nu, n_instances, hourly_cost1_nu,termno, termtime,'No Upfront')
       csv_2[row_count] = csv_row2
   
       # Partial Upfront
-      csv_row3 = []
-      csv_row3.extend(csv_row)
-      csv_row3.append('Partial Upfront')
-      t1 = csv_row3[4]
-      t2 = csv_row3[3]
-      csv_row3[3] = t1
-      csv_row3[4] = t2
-      csv_row3.append(f'{upfront1_pu:0.2f}')
-      csv_row3.append(f'{upfront1_pu*n_instances:0.2f}')
-      csv_row3.append(f'{hourly_cost1_pu*730:0.2f}')
-      csv_row3.append(f'{hourly_cost1_pu*730*12:0.2f}')
-      csv_row3.append(f'{(upfront1_pu)+(hourly_cost1_pu*730*12):0.2f}')
-      csv_row3.append(f'{hourly_cost1_pu*730*n_instances:0.2f}')
-      csv_row3.append(f'{(upfront1_pu*n_instances)+(hourly_cost1_pu*730*n_instances*12):0.2f}')
-      csv_row3.append(termtime)
+      csv_row3 = get_costs(csv_row, upfront1_pu, n_instances, hourly_cost1_pu, termno, termtime,'Partial Upfront')
       csv_3[row_count] = csv_row3
   
       # All Upfront
-      csv_row4 = []
-      csv_row4.extend(csv_row)
-      csv_row4.append('All Upfront')
-      t1 = csv_row4[4]
-      t2 = csv_row4[3]
-      csv_row4[3] = t1
-      csv_row4[4] = t2
-      csv_row4.append(f'{upfront1_au:0.2f}')
-      csv_row4.append(f'{upfront1_au*n_instances:0.2f}')
-      csv_row4.append(f'{hourly_cost1_au*730:0.2f}')
-      csv_row4.append(f'{hourly_cost1_au*730*12:0.2f}')
-      csv_row4.append(f'{(upfront1_au)+(hourly_cost1_au*730*12):0.2f}')
-      csv_row4.append(f'{hourly_cost1_au*730*n_instances:0.2f}')
-      csv_row4.append(f'{(upfront1_au*n_instances)+(hourly_cost1_au*730*n_instances*12):0.2f}')
-      csv_row4.append(termtime)
+      csv_row4 = get_costs(csv_row, upfront1_au, n_instances, hourly_cost1_au, termno, termtime,'All Upfront')
       csv_4[row_count] = csv_row4
       row_count += 1
  
