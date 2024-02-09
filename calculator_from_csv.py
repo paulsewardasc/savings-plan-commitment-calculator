@@ -7,7 +7,7 @@ import datetime
 import sys
 
 def get_costs(a,b,c,d,e,f,g):
-  print(f'[+] {a},{b},{c},{d},{e},{f},{g}')
+  #print(f'[+] {a},{b},{c},{d},{e},{f},{g}')
   row = []
   row.extend(a)
   row.append(g)

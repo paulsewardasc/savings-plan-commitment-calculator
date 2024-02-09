@@ -114,6 +114,7 @@ def get_ondemand_rate(region_code, usage_operation, instance_family, instance_ty
     region_price_ondemand = get_pricing_by_region_ondemand(region_code)
     sku = ''
     sp_rate = 0
+    sku_ondemand = 'Not Available'
     products_ondemand = region_price_ondemand['products']
     for product, product_item in products_ondemand.items():
         if 'instanceType' in product_item['attributes']:
@@ -132,7 +133,9 @@ def get_ondemand_rate(region_code, usage_operation, instance_family, instance_ty
           priceDimensions = term_item[i]['priceDimensions']
           for p in priceDimensions.keys():
             pricePerUnit_ondemand = float(priceDimensions[p]['pricePerUnit']['USD'])
-    
+    if sku_ondemand == 'Not Available':
+      print(f'[-] Error: {instance_type} is not available in {region_code}') 
+      pricePerUnit_ondemand = 0.0001
     return pricePerUnit_ondemand
 
 def get_reserved_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
@@ -143,6 +146,7 @@ def get_reserved_rate(region_code, usage_operation, instance_family, instance_ty
     region_price_reserved = get_pricing_by_region_ondemand(region_code)
     sku = ''
     sp_rate = 0
+    sku_reserved = 'Not Avaialble'
     products_reserved = region_price_reserved['products']
     for product, product_item in products_reserved.items():
         if 'instanceType' in product_item['attributes']:
@@ -171,6 +175,10 @@ def get_reserved_rate(region_code, usage_operation, instance_family, instance_ty
               else:
                 pricePerUnit_reserved = float(priceDimensions[p]['pricePerUnit']['USD'])
     #print(f'[+] Reserved: {pricePerUnit_reserved}, {upfront_fee}')
+    if sku_reserved == 'Not Available':
+      print(f'[-] Error: {instance_type} is not available in {region_code}') 
+      pricePerUnit_reserved = 0.0001
+      upfront_fee = 0.0001
     return pricePerUnit_reserved, upfront_fee
 
 def get_savings_plan_rate(region_code, usage_operation, instance_family, instance_type, tenancy, sp_type, term, purchasing_option):
