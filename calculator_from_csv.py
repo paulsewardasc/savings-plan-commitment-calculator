@@ -51,7 +51,7 @@ else:
     savingsPlanType = 2
     savingsPlanTypeStr = "Compute Savings Plan"
   if argument == "3":
-    savingsPlanType = 1
+    savingsPlanType = 3
     savingsPlanTypeStr = "EC2 Savings Plan"
 
 #input reader
